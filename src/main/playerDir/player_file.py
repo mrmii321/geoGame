@@ -102,9 +102,11 @@ class Player:
         self.on_ground = False
         self.collision.check_floor(floor)
         
-        jumped = self.jump()
-        
+        # Check objects for collision (this also sets on_ground for platforms)
         if self.collision.check_objects(objects):
             return self.die()
+        
+        # Jump after collision detection so on_ground is properly set
+        jumped = self.jump()
         
         return jumped
