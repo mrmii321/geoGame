@@ -1,0 +1,33 @@
+# Game States
+MENU = 0
+LEVEL_SELECT = 1
+PLAYING = 2
+GAME_OVER = 3
+
+# Display Settings
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+FPS = 60
+
+# Grid System
+GRID_SIZE = 50
+
+# Physics
+GRAVITY = 0.35
+JUMP_STRENGTH = -10
+
+# Player Settings
+PLAYER_WIDTH = 50
+PLAYER_HEIGHT = 50
+PLAYER_SPEED = 5
+PLAYER_COLOR = (255, 0, 0)
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (100, 200, 100)
+BLUE = (100, 200, 255)
+DARK_BLUE = (20, 30, 50)
+PURPLE = (150, 100, 255)
+GRAY = (150, 150, 150)
