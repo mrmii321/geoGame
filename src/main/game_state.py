@@ -3,7 +3,7 @@ import json
 from main.playerDir.player_file import Player
 from main.screenDir.screen_file import Display
 from main.objects.floor_terrain import FloorTerrain
-from main.objects.block import Platform
+from main.objects.object_factory import ObjectFactory
 from main.objects.particle import ParticleSystem
 from main.constants import *
 
@@ -11,19 +11,19 @@ from main.constants import *
 class GameState:
     def __init__(self, display):
         self.display = display
-        self.player = Player(50, 50, PLAYER_WIDTH, PLAYER_HEIGHT)
+        self.player = Player(50, 300, PLAYER_WIDTH, PLAYER_HEIGHT)
         self.floor = FloorTerrain(0, 550, 1000, 50, BLACK)
-        self.platforms = []
+        self.objects = []
         self.particle_system = ParticleSystem()
         self.camera_x = 0
         self.current_level = 0
         self.death_timer = 0
         self.score = 0
         
-        self.json_file = r"C:\Users\noahf\Desktop\Development\Python\geoGame\src\main\objects.json"
+        self.json_file = r"C:\Users\noahf\Desktop\Development\Python\geoGame\src\main\demo_level.json"
     
     def load_level(self, level):
-        self.platforms.clear()
+        self.objects.clear()
         self.player.reset()
         self.camera_x = 0
         self.death_timer = 0
@@ -33,10 +33,9 @@ class GameState:
             with open(self.json_file) as f:
                 data = json.load(f)
                 if level < len(data):
-                    for plat in data[level]:
-                        self.platforms.append(
-                            Platform(plat["x"], plat["y"], plat["width"], plat["height"])
-                        )
+                    for obj_data in data[level]:
+                        obj = ObjectFactory.create(obj_data)
+                        self.objects.append(obj)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"Error loading level: {e}")
     
@@ -51,9 +50,13 @@ class GameState:
             self.particle_system.update()
             return
         
+        # Update all objects (for animated/moving objects)
+        for obj in self.objects:
+            obj.update()
+        
         self.camera_x = self.player.display_x - self.player.x
         
-        result = self.player.update(self.floor, self.platforms, self.camera_x)
+        result = self.player.update(self.floor, self.objects, self.camera_x)
         
         # Handle death
         if isinstance(result, tuple):
@@ -76,9 +79,9 @@ class GameState:
         
         self.floor.draw(self.display.surface)
         
-        for plat in self.platforms:
-            if plat.is_visible(self.camera_x, self.display.width):
-                plat.draw(self.display.surface, self.camera_x)
+        for obj in self.objects:
+            if obj.is_visible(self.camera_x, self.display.width):
+                obj.draw(self.display.surface, self.camera_x)
         
         self.player.draw(self.display.surface)
         self.particle_system.draw(self.display.surface, self.camera_x)

@@ -15,20 +15,11 @@ class CollisionDetection:
             return True
         return False
     
-    def check_platforms(self, platforms, camera_x):
-        world_rect = pygame.Rect(self.player.display_x, self.player.y, self.player.width, self.player.height)
-        prev_world_rect = pygame.Rect(self.player.prev_display_x, self.player.prev_y, self.player.width, self.player.height)
-        
-        for platform in platforms:
-            if world_rect.colliderect(platform.rect):
-                # Landing on top
-                if prev_world_rect.bottom <= platform.rect.top + 5:
-                    self.player.y = platform.rect.top - self.player.height
-                    self.player.y_vel = 0
-                    self.player.on_ground = True
-                # Hit from side or bottom
-                else:
-                    return True
+    def check_objects(self, objects):
+        """Check collision with all game objects using polymorphism"""
+        for obj in objects:
+            if obj.on_player_collision(self.player):
+                return True
         return False
 
 
@@ -58,7 +49,8 @@ class Player:
         # Store initial state
         self.initial_state = {
             'x': x, 'display_x': x, 'y': y,
-            'y_vel': 0, 'speed': PLAYER_SPEED
+            'y_vel': 0, 'speed': PLAYER_SPEED,
+            'gravity': GRAVITY, 'jump_strength': JUMP_STRENGTH
         }
     
     def reset(self):
@@ -66,6 +58,8 @@ class Player:
         self.y = self.initial_state['y']
         self.y_vel = self.initial_state['y_vel']
         self.speed = self.initial_state['speed']
+        self.gravity = self.initial_state['gravity']
+        self.jump_strength = self.initial_state['jump_strength']
         self.on_ground = False
         self.is_dead = False
         self.rect.x = self.x
@@ -94,7 +88,7 @@ class Player:
         self.speed = 0
         return self.display_x + self.width // 2, self.y + self.height // 2
     
-    def update(self, floor, platforms, camera_x):
+    def update(self, floor, objects, camera_x):
         if self.is_dead:
             return None
         
@@ -107,11 +101,10 @@ class Player:
         
         self.on_ground = False
         self.collision.check_floor(floor)
-        self.collision.check_platforms(platforms, camera_x)
         
         jumped = self.jump()
         
-        if self.collision.check_platforms(platforms, camera_x):
+        if self.collision.check_objects(objects):
             return self.die()
         
         return jumped
